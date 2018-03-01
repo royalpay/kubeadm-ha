@@ -355,6 +355,7 @@ $ systemctl enable keepalived && systemctl restart keepalived
 * on all kubernetes master nodes: get the source code, and change the working directory to the source code directory
 
 ```
+$ yum install -y git
 $ git clone https://github.com/cookeem/kubeadm-ha
 
 $ cd kubeadm-ha
