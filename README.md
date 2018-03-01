@@ -83,9 +83,9 @@
 
 * load balancer
 
-> keepalived cluster config a virtual IP address (192.168.20.10), this virtual IP address point to devops-master01, devops-master02, devops-master03. 
+> keepalived cluster config a virtual IP address (192.168.20.10), this virtual IP address point to master01, master02, master03. 
 
-> nginx service as the load balancer of devops-master01, devops-master02, devops-master03's apiserver. The other nodes kubernetes services connect the keepalived virtual ip address (192.168.20.10) and nginx exposed port (16443) to communicate with the master cluster's apiservers. 
+> nginx service as the load balancer of master01, master02, master03's apiserver. The other nodes kubernetes services connect the keepalived virtual ip address (192.168.20.10) and nginx exposed port (16443) to communicate with the master cluster's apiservers. 
 
 ---
 
@@ -95,9 +95,9 @@
 
 HostName | IPAddress | Notes | Components 
 :--- | :--- | :--- | :---
-devops-master01 ~ 03 | 192.168.20.27 ~ 29 | master nodes * 3 | keepalived, nginx, etcd, kubelet, kube-apiserver, kube-scheduler, kube-proxy, kube-dashboard, heapster, calico
+master01 ~ 03 | 192.168.20.27 ~ 29 | master nodes * 3 | keepalived, nginx, etcd, kubelet, kube-apiserver, kube-scheduler, kube-proxy, kube-dashboard, heapster, calico
 N/A | 192.168.20.10 | keepalived virtual IP | N/A
-devops-node01 ~ 04 | 192.168.20.17 ~ 20 | worker nodes * 4 | kubelet, kube-proxy
+node01 ~ 04 | 192.168.20.17 ~ 20 | worker nodes * 4 | kubelet, kube-proxy
 
 #### ports list
 
@@ -136,41 +136,47 @@ $ cat /etc/redhat-release
 CentOS Linux release 7.4.1708 (Core) 
 ```
 
-* docker version: 17.12.0-ce-rc2
+* docker version: 18.02.0-ce
 
 ```
+$ curl -fsSL https://get.docker.com/ | sh
+$ systemctl enable docker
+$ systemctl start docker
+
 $ docker version
 Client:
- Version:   17.12.0-ce-rc2
- API version:   1.35
- Go version:    go1.9.2
- Git commit:    f9cde63
- Built: Tue Dec 12 06:42:20 2017
- OS/Arch:   linux/amd64
+ Version:	18.02.0-ce
+ API version:	1.36
+ Go version:	go1.9.3
+ Git commit:	fc4de44
+ Built:	Wed Feb  7 21:14:12 2018
+ OS/Arch:	linux/amd64
+ Experimental:	false
+ Orchestrator:	swarm
 
 Server:
  Engine:
-  Version:  17.12.0-ce-rc2
-  API version:  1.35 (minimum version 1.12)
-  Go version:   go1.9.2
-  Git commit:   f9cde63
-  Built:    Tue Dec 12 06:44:50 2017
-  OS/Arch:  linux/amd64
-  Experimental: false
+  Version:	18.02.0-ce
+  API version:	1.36 (minimum version 1.12)
+  Go version:	go1.9.3
+  Git commit:	fc4de44
+  Built:	Wed Feb  7 21:17:42 2018
+  OS/Arch:	linux/amd64
+  Experimental:	false
 ```
 
-* kubeadm version: v1.9.1
+* kubeadm version: v1.9.3
 
 ```
 $ kubeadm version
-kubeadm version: &version.Info{Major:"1", Minor:"9", GitVersion:"v1.9.1", GitCommit:"3a1c9449a956b6026f075fa3134ff92f7d55f812", GitTreeState:"clean", BuildDate:"2018-01-04T11:40:06Z", GoVersion:"go1.9.2", Compiler:"gc", Platform:"linux/amd64"}
+kubeadm version: &version.Info{Major:"1", Minor:"9", GitVersion:"v1.9.3", GitCommit:"3a1c9449a956b6026f075fa3134ff92f7d55f812", GitTreeState:"clean", BuildDate:"2018-01-04T11:40:06Z", GoVersion:"go1.9.2", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-* kubelet version: v1.9.1
+* kubelet version: v1.9.3
 
 ```
 $ kubelet --version
-Kubernetes v1.9.1
+Kubernetes v1.9.3
 ```
 
 * networks add-ons
@@ -196,10 +202,10 @@ $ docker pull gcr.io/google_containers/heapster-influxdb-amd64:v1.3.3
 $ docker pull gcr.io/google_containers/k8s-dns-kube-dns-amd64:1.14.7
 $ docker pull gcr.io/google_containers/k8s-dns-dnsmasq-nanny-amd64:1.14.7
 $ docker pull gcr.io/google_containers/k8s-dns-sidecar-amd64:1.14.7
-$ docker pull gcr.io/google_containers/kube-apiserver-amd64:v1.9.1
-$ docker pull gcr.io/google_containers/kube-controller-manager-amd64:v1.9.1
-$ docker pull gcr.io/google_containers/kube-proxy-amd64:v1.9.1
-$ docker pull gcr.io/google_containers/kube-scheduler-amd64:v1.9.1
+$ docker pull gcr.io/google_containers/kube-apiserver-amd64:v1.9.3
+$ docker pull gcr.io/google_containers/kube-controller-manager-amd64:v1.9.3
+$ docker pull gcr.io/google_containers/kube-proxy-amd64:v1.9.3
+$ docker pull gcr.io/google_containers/kube-scheduler-amd64:v1.9.3
 $ docker pull gcr.io/google_containers/kubernetes-dashboard-amd64:v1.8.1
 $ docker pull nginx
 ```
@@ -295,11 +301,9 @@ Permissive
 * on all kubernetes nodes: install kubernetes and related services, then start up kubelet and docker daemon
 
 ```
-$ yum install -y docker-ce-17.12.0.ce-0.2.rc2.el7.centos.x86_64
-$ yum install -y docker-compose-1.9.0-5.el7.noarch
 $ systemctl enable docker && systemctl start docker
 
-$ yum install -y kubelet-1.9.1-0.x86_64 kubeadm-1.9.1-0.x86_64 kubectl-1.9.1-0.x86_64
+$ yum install -y kubelet-1.9.3-0.x86_64 kubeadm-1.9.3-0.x86_64 kubectl-1.9.3-0.x86_64
 $ systemctl enable kubelet && systemctl start kubelet
 ```
 
@@ -375,13 +379,13 @@ export K8SHA_IP2=192.168.20.28
 export K8SHA_IP3=192.168.20.29
 
 # master01 hostname
-export K8SHA_HOSTNAME1=devops-master01
+export K8SHA_HOSTNAME1=master01
 
 # master02 hostname
-export K8SHA_HOSTNAME2=devops-master02
+export K8SHA_HOSTNAME2=master02
 
 # master03 hostname
-export K8SHA_HOSTNAME3=devops-master03
+export K8SHA_HOSTNAME3=master03
 
 # keepalived auth_pass config, all masters must be same
 export K8SHA_KA_AUTH=4cdf7dc3b4c90194d1600c483e10ad1d
@@ -476,7 +480,7 @@ $ systemctl restart docker && systemctl restart kubelet
 $ ip a | grep -E 'docker|flannel|cni'
 ```
 
-* on devops-master01: use kubeadm to init a kubernetes cluster, notice: you must save the following message: kubeadm join --token XXX --discovery-token-ca-cert-hash YYY , this command will use lately.
+* on master01: use kubeadm to init a kubernetes cluster, notice: you must save the following message: kubeadm join --token XXX --discovery-token-ca-cert-hash YYY , this command will use lately.
 
 ```
 $ kubeadm init --config=kubeadm-init.yaml
@@ -495,13 +499,13 @@ $ source ~/.bashrc
 
 #### basic components installation
 
-* on devops-master01: install flannel network add-ons
+* on master01: install flannel network add-ons
 
 ```
 # master may not work if no network add-ons
 $ kubectl get node
 NAME              STATUS    ROLES     AGE       VERSION
-devops-master01   NotReady  master    14s       v1.9.1
+master01   NotReady  master    14s       v1.9.3
 
 # install flannel add-ons
 $ kubectl apply -f kube-flannel/
@@ -515,7 +519,7 @@ daemonset "kube-flannel-ds" created
 $ kubectl get pods --all-namespaces -o wide -w
 ```
 
-* on devops-master01: install calico network add-ons
+* on master01: install calico network add-ons
 
 ```
 # set master node as schedulable
@@ -535,7 +539,7 @@ clusterrole "calico-node" created
 clusterrolebinding "calico-node" created
 ```
 
-* on devops-master01: install dashboard
+* on master01: install dashboard
 
 ```
 $ kubectl apply -f kube-dashboard/
@@ -552,18 +556,18 @@ $ kubectl get pods --all-namespaces
 NAMESPACE       NAME                                        READY     STATUS    RESTARTS   AGE
 kube-system     calico-kube-controllers-7749c84f4-p8c4d     1/1       Running   0          3m
 kube-system     calico-node-2jlwj                           2/2       Running   6          13m
-kube-system     kube-apiserver-devops-master01              1/1       Running   6          5m
-kube-system     kube-controller-manager-devops-master01     1/1       Running   8          5m
+kube-system     kube-apiserver-master01              1/1       Running   6          5m
+kube-system     kube-controller-manager-master01     1/1       Running   8          5m
 kube-system     kube-dns-6f4fd4bdf-8jnpc                    3/3       Running   3          4m
 kube-system     kube-flannel-ds-2fgsw                       1/1       Running   8          14m
 kube-system     kube-proxy-7rh8x                            1/1       Running   3          13m
-kube-system     kube-scheduler-devops-master01              1/1       Running   8          5m
+kube-system     kube-scheduler-master01              1/1       Running   8          5m
 kube-system     kubernetes-dashboard-87497878f-p6nj4        1/1       Running   0          4m
 ```
 
 * use browser to access dashboard
 
-> https://devops-master01:30000/#!/login
+> https://master01:30000/#!/login
 
 * dashboard login interface
 
@@ -577,7 +581,7 @@ $ kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | g
 
 ![dashboard](images/dashboard.png)
 
-* on devops-master01: install heapster
+* on master01: install heapster
 
 ```
 $ kubectl apply -f kube-heapster/influxdb/
@@ -596,12 +600,12 @@ NAME                                      READY     STATUS        RESTARTS   AGE
 calico-kube-controllers-7749c84f4-p8c4d   1/1       Running       0          8m
 calico-node-2jlwj                         2/2       Running       6          13d
 heapster-698c5f45bd-wnv6x                 1/1       Running       0          1m
-kube-apiserver-devops-master01            1/1       Running       6          5d
-kube-controller-manager-devops-master01   1/1       Running       8          5d
+kube-apiserver-master01            1/1       Running       6          5d
+kube-controller-manager-master01   1/1       Running       8          5d
 kube-dns-6f4fd4bdf-8jnpc                  3/3       Running       3          4h
 kube-flannel-ds-2fgsw                     1/1       Running       8          14d
 kube-proxy-7rh8x                          1/1       Running       3          13d
-kube-scheduler-devops-master01            1/1       Running       8          5d
+kube-scheduler-master01            1/1       Running       8          5d
 kubernetes-dashboard-87497878f-p6nj4      1/1       Running       0          4h
 monitoring-grafana-5ffb49ff84-xxwzn       1/1       Running       0          1m
 monitoring-influxdb-5b77d47fdd-wd7xm      1/1       Running       0          1m
@@ -612,12 +616,12 @@ NAMESPACE     NAME                                      CPU(cores)   MEMORY(byte
 kube-system   calico-kube-controllers-d987c6db5-zjxnv   0m           20Mi            
 kube-system   calico-node-hmdlg                         16m          83Mi            
 kube-system   heapster-dfd674df9-hct67                  1m           24Mi            
-kube-system   kube-apiserver-devops-master01            24m          240Mi           
-kube-system   kube-controller-manager-devops-master01   14m          50Mi            
+kube-system   kube-apiserver-master01                   24m          240Mi           
+kube-system   kube-controller-manager-master01          14m          50Mi            
 kube-system   kube-dns-6f4fd4bdf-zg66x                  1m           49Mi            
 kube-system   kube-flannel-ds-h7ng4                     6m           33Mi            
 kube-system   kube-proxy-mxcwz                          2m           29Mi            
-kube-system   kube-scheduler-devops-master01            5m           22Mi            
+kube-system   kube-scheduler-master01                   5m           22Mi            
 kube-system   kubernetes-dashboard-7b7b5cd79b-6ldfn     0m           20Mi            
 kube-system   monitoring-grafana-76848b566c-h5998       0m           28Mi            
 kube-system   monitoring-influxdb-6c4b84d695-whzmp      1m           24Mi            
@@ -625,7 +629,7 @@ kube-system   monitoring-influxdb-6c4b84d695-whzmp      1m           24Mi
 
 * heapster performance info will show on dashboard
 
-> https://devops-master01:30000/#!/login
+> https://master01:30000/#!/login
 
 ![heapster-dashboard](images/heapster-dashboard.png)
 
@@ -641,12 +645,12 @@ kube-system   monitoring-influxdb-6c4b84d695-whzmp      1m           24Mi
 
 #### copy configuration files
 
-* on devops-master01: copy `category/etc/kubernetes/pki` to devops-master02 and devops-master03
+* on master01: copy `category/etc/kubernetes/pki` to master02 and master03
 
 ```
-scp -r /etc/kubernetes/pki devops-master02:/etc/kubernetes/
+scp -r /etc/kubernetes/pki master02:/etc/kubernetes/
 
-scp -r /etc/kubernetes/pki devops-master03:/etc/kubernetes/
+scp -r /etc/kubernetes/pki master03:/etc/kubernetes/
 ```
 
 ---
@@ -654,19 +658,19 @@ scp -r /etc/kubernetes/pki devops-master03:/etc/kubernetes/
 
 #### other master nodes init
 
-* on devops-master02: use kubeadm to init master cluster
+* on master02: use kubeadm to init master cluster
 
 ```
-# you will found that output token and discovery-token-ca-cert-hash are the same with devops-master01
+# you will found that output token and discovery-token-ca-cert-hash are the same with master01
 $ kubeadm init --config=kubeadm-init.yaml
 ...
   kubeadm join --token 7f276c.0741d82a5337f526 192.168.20.28:6443 --discovery-token-ca-cert-hash sha256:a4a1eaf725a0fc67c3028b3063b92e6af7f2eb0f4ae028f12b3415a6fd2d2a5e
 ```
 
-* on devops-master03: use kubeadm to init master cluster
+* on master03: use kubeadm to init master cluster
 
 ```
-# you will found that output token and discovery-token-ca-cert-hash are the same with devops-master01
+# you will found that output token and discovery-token-ca-cert-hash are the same with master01
 $ kubeadm init --config=kubeadm-init.yaml
 ...
   kubeadm join --token 7f276c.0741d82a5337f526 192.168.20.29:6443 --discovery-token-ca-cert-hash sha256:a4a1eaf725a0fc67c3028b3063b92e6af7f2eb0f4ae028f12b3415a6fd2d2a5e
@@ -677,9 +681,9 @@ $ kubeadm init --config=kubeadm-init.yaml
 ```
 $ kubectl get nodes
 NAME              STATUS    ROLES     AGE       VERSION
-devops-master01   Ready     master    19m       v1.9.1
-devops-master02   Ready     master    4m        v1.9.1
-devops-master03   Ready     master    4m        v1.9.1
+master01          Ready     master    19m       v1.9.3
+master02          Ready     master    4m        v1.9.3
+master03          Ready     master    4m        v1.9.3
 ```
 
 * on all kubernetes master nodes: add apiserver-count settings in `/etc/kubernetes/manifests/kube-apiserver.yaml` file
@@ -697,38 +701,38 @@ $ systemctl restart docker && systemctl restart kubelet
 ```
 $ kubectl get pods --all-namespaces -o wide
 NAMESPACE     NAME                                      READY     STATUS    RESTARTS   AGE       IP              NODE
-kube-system   calico-kube-controllers-d987c6db5-zjxnv   1/1       Running   2          14m       192.168.20.27   devops-master01
-kube-system   calico-node-dldxz                         2/2       Running   2          3m        192.168.20.29   devops-master03
-kube-system   calico-node-hmdlg                         2/2       Running   4          14m       192.168.20.27   devops-master01
-kube-system   calico-node-tkbbx                         2/2       Running   2          3m        192.168.20.28   devops-master02
-kube-system   heapster-dfd674df9-hct67                  1/1       Running   2          11m       10.244.172.11   devops-master01
-kube-system   kube-apiserver-devops-master01            1/1       Running   1          2m        192.168.20.27   devops-master01
-kube-system   kube-apiserver-devops-master02            1/1       Running   1          2m        192.168.20.28   devops-master02
-kube-system   kube-apiserver-devops-master03            1/1       Running   0          24s       192.168.20.29   devops-master03
-kube-system   kube-controller-manager-devops-master01   1/1       Running   2          15m       192.168.20.27   devops-master01
-kube-system   kube-controller-manager-devops-master02   1/1       Running   1          2m        192.168.20.28   devops-master02
-kube-system   kube-controller-manager-devops-master03   1/1       Running   1          2m        192.168.20.29   devops-master03
-kube-system   kube-dns-6f4fd4bdf-zg66x                  3/3       Running   6          16m       10.244.172.13   devops-master01
-kube-system   kube-flannel-ds-6njgf                     1/1       Running   1          3m        192.168.20.29   devops-master03
-kube-system   kube-flannel-ds-g24ww                     1/1       Running   1          3m        192.168.20.28   devops-master02
-kube-system   kube-flannel-ds-h7ng4                     1/1       Running   2          16m       192.168.20.27   devops-master01
-kube-system   kube-proxy-2kk8s                          1/1       Running   1          3m        192.168.20.28   devops-master02
-kube-system   kube-proxy-mxcwz                          1/1       Running   2          16m       192.168.20.27   devops-master01
-kube-system   kube-proxy-vz7nf                          1/1       Running   1          3m        192.168.20.29   devops-master03
-kube-system   kube-scheduler-devops-master01            1/1       Running   2          16m       192.168.20.27   devops-master01
-kube-system   kube-scheduler-devops-master02            1/1       Running   1          2m        192.168.20.28   devops-master02
-kube-system   kube-scheduler-devops-master03            1/1       Running   1          2m        192.168.20.29   devops-master03
-kube-system   kubernetes-dashboard-7b7b5cd79b-6ldfn     1/1       Running   3          12m       10.244.172.12   devops-master01
-kube-system   monitoring-grafana-76848b566c-h5998       1/1       Running   2          11m       10.244.172.14   devops-master01
-kube-system   monitoring-influxdb-6c4b84d695-whzmp      1/1       Running   2          11m       10.244.172.10   devops-master01
+kube-system   calico-kube-controllers-d987c6db5-zjxnv   1/1       Running   2          14m       192.168.20.27   master01
+kube-system   calico-node-dldxz                         2/2       Running   2          3m        192.168.20.29   master03
+kube-system   calico-node-hmdlg                         2/2       Running   4          14m       192.168.20.27   master01
+kube-system   calico-node-tkbbx                         2/2       Running   2          3m        192.168.20.28   master02
+kube-system   heapster-dfd674df9-hct67                  1/1       Running   2          11m       10.244.172.11   master01
+kube-system   kube-apiserver-master01                   1/1       Running   1          2m        192.168.20.27   master01
+kube-system   kube-apiserver-master02                   1/1       Running   1          2m        192.168.20.28   master02
+kube-system   kube-apiserver       -master03            1/1       Running   0          24s       192.168.20.29   master03
+kube-system   kube-controller-manager-master01          1/1       Running   2          15m       192.168.20.27   master01
+kube-system   kube-controller-manager-master02          1/1       Running   1          2m        192.168.20.28   master02
+kube-system   kube-controller-manager-master03          1/1       Running   1          2m        192.168.20.29   master03
+kube-system   kube-dns-6f4fd4bdf-zg66x                  3/3       Running   6          16m       10.244.172.13   master01
+kube-system   kube-flannel-ds-6njgf                     1/1       Running   1          3m        192.168.20.29   master03
+kube-system   kube-flannel-ds-g24ww                     1/1       Running   1          3m        192.168.20.28   master02
+kube-system   kube-flannel-ds-h7ng4                     1/1       Running   2          16m       192.168.20.27   master01
+kube-system   kube-proxy-2kk8s                          1/1       Running   1          3m        192.168.20.28   master02
+kube-system   kube-proxy-mxcwz                          1/1       Running   2          16m       192.168.20.27   master01
+kube-system   kube-proxy-vz7nf                          1/1       Running   1          3m        192.168.20.29   master03
+kube-system   kube-scheduler-master01                   1/1       Running   2          16m       192.168.20.27   master01
+kube-system   kube-scheduler-master02                   1/1       Running   1          2m        192.168.20.28   master02
+kube-system   kube-scheduler-master03                   1/1       Running   1          2m        192.168.20.29   master03
+kube-system   kubernetes-dashboard-7b7b5cd79b-6ldfn     1/1       Running   3          12m       10.244.172.12   master01
+kube-system   monitoring-grafana-76848b566c-h5998       1/1       Running   2          11m       10.244.172.14   master01
+kube-system   monitoring-influxdb-6c4b84d695-whzmp      1/1       Running   2          11m       10.244.172.10   master01
 ```
 
 * on any kubernetes master nodes: set all master nodes scheduable
 
 ```
 $ kubectl taint nodes --all node-role.kubernetes.io/master-
-node "devops-master02" untainted
-node "devops-master03" untainted
+node "master02" untainted
+node "master03" untainted
 ```
 
 * on any kubernetes master nodes: scale the kube-system deployment to all master nodes
@@ -759,9 +763,9 @@ $ kubectl get pods --all-namespaces -o wide| grep kubernetes-dashboard
 ```
 kubectl get nodes
 NAME              STATUS    ROLES     AGE       VERSION
-devops-master01   Ready     master    38m       v1.9.1
-devops-master02   Ready     master    25m       v1.9.1
-devops-master03   Ready     master    25m       v1.9.1
+master01          Ready     master    38m       v1.9.3
+master02          Ready     master    25m       v1.9.3
+master03          Ready     master    25m       v1.9.3
 ```
 
 ---
@@ -829,7 +833,7 @@ $ kubectl delete pod -n kube-system kube-proxy-XXX
 
 #### use kubeadm to join the cluster
 
-- on all kubernetes worker nodes: use kubeadm to join the cluster, here we use the devops-master01 apiserver address and port.
+- on all kubernetes worker nodes: use kubeadm to join the cluster, here we use the master01 apiserver address and port.
 
 ```
 $ kubeadm join --token 7f276c.0741d82a5337f526 192.168.20.27:6443 --discovery-token-ca-cert-hash sha256:a4a1eaf725a0fc67c3028b3063b92e6af7f2eb0f4ae028f12b3415a6fd2d2a5e
@@ -847,22 +851,22 @@ systemctl restart docker && systemctl restart kubelet
 ```
 kubectl get nodes
 NAME              STATUS    ROLES     AGE       VERSION
-devops-master01   Ready     master    46m       v1.9.1
-devops-master02   Ready     master    44m       v1.9.1
-devops-master03   Ready     master    44m       v1.9.1
-devops-node01     Ready     <none>    50s       v1.9.1
-devops-node02     Ready     <none>    26s       v1.9.1
-devops-node03     Ready     <none>    22s       v1.9.1
-devops-node04     Ready     <none>    17s       v1.9.1
+master01          Ready     master    46m       v1.9.3
+master02          Ready     master    44m       v1.9.3
+master03          Ready     master    44m       v1.9.3
+node01            Ready     <none>    50s       v1.9.3
+node02            Ready     <none>    26s       v1.9.3
+node03            Ready     <none>    22s       v1.9.3
+node04            Ready     <none>    17s       v1.9.3
 ```
 
 - on any kubernetes master nodes: set the worker nodes labels
 
 ```
-kubectl label nodes devops-node01 role=worker
-kubectl label nodes devops-node02 role=worker
-kubectl label nodes devops-node03 role=worker
-kubectl label nodes devops-node04 role=worker
+kubectl label nodes node01 role=worker
+kubectl label nodes node02 role=worker
+kubectl label nodes node03 role=worker
+kubectl label nodes node04 role=worker
 ```
 
 #### verify kubernetes cluster high availiablity
@@ -875,9 +879,9 @@ deployment "nginx" created
 # check nginx pod status
 $ kubectl get pods -l=run=nginx -o wide
 NAME                     READY     STATUS    RESTARTS   AGE       IP              NODE
-nginx-6c7c8978f5-558kd   1/1       Running   0          9m        10.244.77.217   devops-node03
-nginx-6c7c8978f5-ft2z5   1/1       Running   0          9m        10.244.172.67   devops-master01
-nginx-6c7c8978f5-jr29b   1/1       Running   0          9m        10.244.85.165   devops-node04
+nginx-6c7c8978f5-558kd   1/1       Running   0          9m        10.244.77.217   node03
+nginx-6c7c8978f5-ft2z5   1/1       Running   0          9m        10.244.172.67   master01
+nginx-6c7c8978f5-jr29b   1/1       Running   0          9m        10.244.85.165   node04
 
 # create nginx NodePort service
 $ kubectl expose deployment nginx --type=NodePort --port=80
@@ -889,7 +893,7 @@ NAME      TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE       SEL
 nginx     NodePort   10.101.144.192   <none>        80:30847/TCP   10m       run=nginx
 
 # check nginx NodePort service accessibility
-$ curl devops-master01:30847
+$ curl master01:30847
 <!DOCTYPE html>
 <html>
 <head>
