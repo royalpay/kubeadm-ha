@@ -83,9 +83,9 @@
 
 * load balancer
 
-> keepalived cluster config a virtual IP address (192.168.20.10), this virtual IP address point to master01, master02, master03. 
+> keepalived cluster config a virtual IP address (192.168.20.10), this virtual IP address point to k8s-master01, k8s-master02, k8s-master03. 
 
-> nginx service as the load balancer of master01, master02, master03's apiserver. The other nodes kubernetes services connect the keepalived virtual ip address (192.168.20.10) and nginx exposed port (16443) to communicate with the master cluster's apiservers. 
+> nginx service as the load balancer of k8s-master01, k8s-master02, k8s-master03's apiserver. The other nodes kubernetes services connect the keepalived virtual ip address (192.168.20.10) and nginx exposed port (16443) to communicate with the master cluster's apiservers. 
 
 ---
 
@@ -95,7 +95,7 @@
 
 HostName | IPAddress | Notes | Components 
 :--- | :--- | :--- | :---
-master01 ~ 03 | 192.168.20.27 ~ 29 | master nodes * 3 | keepalived, nginx, etcd, kubelet, kube-apiserver, kube-scheduler, kube-proxy, kube-dashboard, heapster, calico
+k8s-master01 ~ 03 | 192.168.20.27 ~ 29 | master nodes * 3 | keepalived, nginx, etcd, kubelet, kube-apiserver, kube-scheduler, kube-proxy, kube-dashboard, heapster, calico
 N/A | 192.168.20.10 | keepalived virtual IP | N/A
 node01 ~ 04 | 192.168.20.17 ~ 20 | worker nodes * 4 | kubelet, kube-proxy
 
@@ -139,10 +139,6 @@ CentOS Linux release 7.4.1708 (Core)
 * docker version: 18.02.0-ce
 
 ```
-$ curl -fsSL https://get.docker.com/ | sh
-$ systemctl enable docker
-$ systemctl start docker
-
 $ docker version
 Client:
  Version:	18.02.0-ce
@@ -301,7 +297,9 @@ Permissive
 * on all kubernetes nodes: install kubernetes and related services, then start up kubelet and docker daemon
 
 ```
+$ curl -fsSL https://get.docker.com/ | sh
 $ systemctl enable docker && systemctl start docker
+$ yum install -y docker-compose-1.9.0-5.el7.noarch
 
 $ yum install -y kubelet-1.9.3-0.x86_64 kubeadm-1.9.3-0.x86_64 kubectl-1.9.3-0.x86_64
 $ systemctl enable kubelet && systemctl start kubelet
@@ -369,23 +367,23 @@ export K8SHA_KA_INTF=nm-bond
 # master keepalived virtual ip address
 export K8SHA_IPVIRTUAL=192.168.20.10
 
-# master01 ip address
+# k8s-master01 ip address
 export K8SHA_IP1=192.168.20.27
 
-# master02 ip address
+# k8s-master02 ip address
 export K8SHA_IP2=192.168.20.28
 
-# master03 ip address
+# k8s-master03 ip address
 export K8SHA_IP3=192.168.20.29
 
-# master01 hostname
-export K8SHA_HOSTNAME1=master01
+# k8s-master01 hostname
+export K8SHA_HOSTNAME1=k8s-master01
 
-# master02 hostname
-export K8SHA_HOSTNAME2=master02
+# k8s-master02 hostname
+export K8SHA_HOSTNAME2=k8s-master02
 
-# master03 hostname
-export K8SHA_HOSTNAME3=master03
+# k8s-master03 hostname
+export K8SHA_HOSTNAME3=k8s-master03
 
 # keepalived auth_pass config, all masters must be same
 export K8SHA_KA_AUTH=4cdf7dc3b4c90194d1600c483e10ad1d
@@ -480,7 +478,7 @@ $ systemctl restart docker && systemctl restart kubelet
 $ ip a | grep -E 'docker|flannel|cni'
 ```
 
-* on master01: use kubeadm to init a kubernetes cluster, notice: you must save the following message: kubeadm join --token XXX --discovery-token-ca-cert-hash YYY , this command will use lately.
+* on k8s-master01: use kubeadm to init a kubernetes cluster, notice: you must save the following message: kubeadm join --token XXX --discovery-token-ca-cert-hash YYY , this command will use lately.
 
 ```
 $ kubeadm init --config=kubeadm-init.yaml
@@ -499,13 +497,13 @@ $ source ~/.bashrc
 
 #### basic components installation
 
-* on master01: install flannel network add-ons
+* on k8s-master01: install flannel network add-ons
 
 ```
 # master may not work if no network add-ons
 $ kubectl get node
 NAME              STATUS    ROLES     AGE       VERSION
-master01   NotReady  master    14s       v1.9.3
+k8s-master01   NotReady  master    14s       v1.9.3
 
 # install flannel add-ons
 $ kubectl apply -f kube-flannel/
@@ -519,7 +517,7 @@ daemonset "kube-flannel-ds" created
 $ kubectl get pods --all-namespaces -o wide -w
 ```
 
-* on master01: install calico network add-ons
+* on k8s-master01: install calico network add-ons
 
 ```
 # set master node as schedulable
@@ -539,7 +537,7 @@ clusterrole "calico-node" created
 clusterrolebinding "calico-node" created
 ```
 
-* on master01: install dashboard
+* on k8s-master01: install dashboard
 
 ```
 $ kubectl apply -f kube-dashboard/
@@ -556,18 +554,18 @@ $ kubectl get pods --all-namespaces
 NAMESPACE       NAME                                        READY     STATUS    RESTARTS   AGE
 kube-system     calico-kube-controllers-7749c84f4-p8c4d     1/1       Running   0          3m
 kube-system     calico-node-2jlwj                           2/2       Running   6          13m
-kube-system     kube-apiserver-master01              1/1       Running   6          5m
-kube-system     kube-controller-manager-master01     1/1       Running   8          5m
+kube-system     kube-apiserver-k8s-master01              1/1       Running   6          5m
+kube-system     kube-controller-manager-k8s-master01     1/1       Running   8          5m
 kube-system     kube-dns-6f4fd4bdf-8jnpc                    3/3       Running   3          4m
 kube-system     kube-flannel-ds-2fgsw                       1/1       Running   8          14m
 kube-system     kube-proxy-7rh8x                            1/1       Running   3          13m
-kube-system     kube-scheduler-master01              1/1       Running   8          5m
+kube-system     kube-scheduler-k8s-master01              1/1       Running   8          5m
 kube-system     kubernetes-dashboard-87497878f-p6nj4        1/1       Running   0          4m
 ```
 
 * use browser to access dashboard
 
-> https://master01:30000/#!/login
+> https://k8s-master01:30000/#!/login
 
 * dashboard login interface
 
@@ -581,7 +579,7 @@ $ kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | g
 
 ![dashboard](images/dashboard.png)
 
-* on master01: install heapster
+* on k8s-master01: install heapster
 
 ```
 $ kubectl apply -f kube-heapster/influxdb/
@@ -600,12 +598,12 @@ NAME                                      READY     STATUS        RESTARTS   AGE
 calico-kube-controllers-7749c84f4-p8c4d   1/1       Running       0          8m
 calico-node-2jlwj                         2/2       Running       6          13d
 heapster-698c5f45bd-wnv6x                 1/1       Running       0          1m
-kube-apiserver-master01            1/1       Running       6          5d
-kube-controller-manager-master01   1/1       Running       8          5d
+kube-apiserver-k8s-master01            1/1       Running       6          5d
+kube-controller-manager-k8s-master01   1/1       Running       8          5d
 kube-dns-6f4fd4bdf-8jnpc                  3/3       Running       3          4h
 kube-flannel-ds-2fgsw                     1/1       Running       8          14d
 kube-proxy-7rh8x                          1/1       Running       3          13d
-kube-scheduler-master01            1/1       Running       8          5d
+kube-scheduler-k8s-master01            1/1       Running       8          5d
 kubernetes-dashboard-87497878f-p6nj4      1/1       Running       0          4h
 monitoring-grafana-5ffb49ff84-xxwzn       1/1       Running       0          1m
 monitoring-influxdb-5b77d47fdd-wd7xm      1/1       Running       0          1m
@@ -616,12 +614,12 @@ NAMESPACE     NAME                                      CPU(cores)   MEMORY(byte
 kube-system   calico-kube-controllers-d987c6db5-zjxnv   0m           20Mi            
 kube-system   calico-node-hmdlg                         16m          83Mi            
 kube-system   heapster-dfd674df9-hct67                  1m           24Mi            
-kube-system   kube-apiserver-master01                   24m          240Mi           
-kube-system   kube-controller-manager-master01          14m          50Mi            
+kube-system   kube-apiserver-k8s-master01                   24m          240Mi           
+kube-system   kube-controller-manager-k8s-master01          14m          50Mi            
 kube-system   kube-dns-6f4fd4bdf-zg66x                  1m           49Mi            
 kube-system   kube-flannel-ds-h7ng4                     6m           33Mi            
 kube-system   kube-proxy-mxcwz                          2m           29Mi            
-kube-system   kube-scheduler-master01                   5m           22Mi            
+kube-system   kube-scheduler-k8s-master01                   5m           22Mi            
 kube-system   kubernetes-dashboard-7b7b5cd79b-6ldfn     0m           20Mi            
 kube-system   monitoring-grafana-76848b566c-h5998       0m           28Mi            
 kube-system   monitoring-influxdb-6c4b84d695-whzmp      1m           24Mi            
@@ -629,7 +627,7 @@ kube-system   monitoring-influxdb-6c4b84d695-whzmp      1m           24Mi
 
 * heapster performance info will show on dashboard
 
-> https://master01:30000/#!/login
+> https://k8s-master01:30000/#!/login
 
 ![heapster-dashboard](images/heapster-dashboard.png)
 
@@ -645,12 +643,12 @@ kube-system   monitoring-influxdb-6c4b84d695-whzmp      1m           24Mi
 
 #### copy configuration files
 
-* on master01: copy `category/etc/kubernetes/pki` to master02 and master03
+* on k8s-master01: copy `category/etc/kubernetes/pki` to k8s-master02 and k8s-master03
 
 ```
-scp -r /etc/kubernetes/pki master02:/etc/kubernetes/
+scp -r /etc/kubernetes/pki k8s-master02:/etc/kubernetes/
 
-scp -r /etc/kubernetes/pki master03:/etc/kubernetes/
+scp -r /etc/kubernetes/pki k8s-master03:/etc/kubernetes/
 ```
 
 ---
@@ -658,19 +656,19 @@ scp -r /etc/kubernetes/pki master03:/etc/kubernetes/
 
 #### other master nodes init
 
-* on master02: use kubeadm to init master cluster
+* on k8s-master02: use kubeadm to init master cluster
 
 ```
-# you will found that output token and discovery-token-ca-cert-hash are the same with master01
+# you will found that output token and discovery-token-ca-cert-hash are the same with k8s-master01
 $ kubeadm init --config=kubeadm-init.yaml
 ...
   kubeadm join --token 7f276c.0741d82a5337f526 192.168.20.28:6443 --discovery-token-ca-cert-hash sha256:a4a1eaf725a0fc67c3028b3063b92e6af7f2eb0f4ae028f12b3415a6fd2d2a5e
 ```
 
-* on master03: use kubeadm to init master cluster
+* on k8s-master03: use kubeadm to init master cluster
 
 ```
-# you will found that output token and discovery-token-ca-cert-hash are the same with master01
+# you will found that output token and discovery-token-ca-cert-hash are the same with k8s-master01
 $ kubeadm init --config=kubeadm-init.yaml
 ...
   kubeadm join --token 7f276c.0741d82a5337f526 192.168.20.29:6443 --discovery-token-ca-cert-hash sha256:a4a1eaf725a0fc67c3028b3063b92e6af7f2eb0f4ae028f12b3415a6fd2d2a5e
@@ -681,9 +679,9 @@ $ kubeadm init --config=kubeadm-init.yaml
 ```
 $ kubectl get nodes
 NAME              STATUS    ROLES     AGE       VERSION
-master01          Ready     master    19m       v1.9.3
-master02          Ready     master    4m        v1.9.3
-master03          Ready     master    4m        v1.9.3
+k8s-master01          Ready     master    19m       v1.9.3
+k8s-master02          Ready     master    4m        v1.9.3
+k8s-master03          Ready     master    4m        v1.9.3
 ```
 
 * on all kubernetes master nodes: add apiserver-count settings in `/etc/kubernetes/manifests/kube-apiserver.yaml` file
@@ -701,38 +699,38 @@ $ systemctl restart docker && systemctl restart kubelet
 ```
 $ kubectl get pods --all-namespaces -o wide
 NAMESPACE     NAME                                      READY     STATUS    RESTARTS   AGE       IP              NODE
-kube-system   calico-kube-controllers-d987c6db5-zjxnv   1/1       Running   2          14m       192.168.20.27   master01
-kube-system   calico-node-dldxz                         2/2       Running   2          3m        192.168.20.29   master03
-kube-system   calico-node-hmdlg                         2/2       Running   4          14m       192.168.20.27   master01
-kube-system   calico-node-tkbbx                         2/2       Running   2          3m        192.168.20.28   master02
-kube-system   heapster-dfd674df9-hct67                  1/1       Running   2          11m       10.244.172.11   master01
-kube-system   kube-apiserver-master01                   1/1       Running   1          2m        192.168.20.27   master01
-kube-system   kube-apiserver-master02                   1/1       Running   1          2m        192.168.20.28   master02
-kube-system   kube-apiserver       -master03            1/1       Running   0          24s       192.168.20.29   master03
-kube-system   kube-controller-manager-master01          1/1       Running   2          15m       192.168.20.27   master01
-kube-system   kube-controller-manager-master02          1/1       Running   1          2m        192.168.20.28   master02
-kube-system   kube-controller-manager-master03          1/1       Running   1          2m        192.168.20.29   master03
-kube-system   kube-dns-6f4fd4bdf-zg66x                  3/3       Running   6          16m       10.244.172.13   master01
-kube-system   kube-flannel-ds-6njgf                     1/1       Running   1          3m        192.168.20.29   master03
-kube-system   kube-flannel-ds-g24ww                     1/1       Running   1          3m        192.168.20.28   master02
-kube-system   kube-flannel-ds-h7ng4                     1/1       Running   2          16m       192.168.20.27   master01
-kube-system   kube-proxy-2kk8s                          1/1       Running   1          3m        192.168.20.28   master02
-kube-system   kube-proxy-mxcwz                          1/1       Running   2          16m       192.168.20.27   master01
-kube-system   kube-proxy-vz7nf                          1/1       Running   1          3m        192.168.20.29   master03
-kube-system   kube-scheduler-master01                   1/1       Running   2          16m       192.168.20.27   master01
-kube-system   kube-scheduler-master02                   1/1       Running   1          2m        192.168.20.28   master02
-kube-system   kube-scheduler-master03                   1/1       Running   1          2m        192.168.20.29   master03
-kube-system   kubernetes-dashboard-7b7b5cd79b-6ldfn     1/1       Running   3          12m       10.244.172.12   master01
-kube-system   monitoring-grafana-76848b566c-h5998       1/1       Running   2          11m       10.244.172.14   master01
-kube-system   monitoring-influxdb-6c4b84d695-whzmp      1/1       Running   2          11m       10.244.172.10   master01
+kube-system   calico-kube-controllers-d987c6db5-zjxnv   1/1       Running   2          14m       192.168.20.27   k8s-master01
+kube-system   calico-node-dldxz                         2/2       Running   2          3m        192.168.20.29   k8s-master03
+kube-system   calico-node-hmdlg                         2/2       Running   4          14m       192.168.20.27   k8s-master01
+kube-system   calico-node-tkbbx                         2/2       Running   2          3m        192.168.20.28   k8s-master02
+kube-system   heapster-dfd674df9-hct67                  1/1       Running   2          11m       10.244.172.11   k8s-master01
+kube-system   kube-apiserver-k8s-master01                   1/1       Running   1          2m        192.168.20.27   k8s-master01
+kube-system   kube-apiserver-k8s-master02                   1/1       Running   1          2m        192.168.20.28   k8s-master02
+kube-system   kube-apiserver-k8s-master03            1/1       Running   0          24s       192.168.20.29   k8s-master03
+kube-system   kube-controller-manager-k8s-master01          1/1       Running   2          15m       192.168.20.27   k8s-master01
+kube-system   kube-controller-manager-k8s-master02          1/1       Running   1          2m        192.168.20.28   k8s-master02
+kube-system   kube-controller-manager-k8s-master03          1/1       Running   1          2m        192.168.20.29   k8s-master03
+kube-system   kube-dns-6f4fd4bdf-zg66x                  3/3       Running   6          16m       10.244.172.13   k8s-master01
+kube-system   kube-flannel-ds-6njgf                     1/1       Running   1          3m        192.168.20.29   k8s-master03
+kube-system   kube-flannel-ds-g24ww                     1/1       Running   1          3m        192.168.20.28   k8s-master02
+kube-system   kube-flannel-ds-h7ng4                     1/1       Running   2          16m       192.168.20.27   k8s-master01
+kube-system   kube-proxy-2kk8s                          1/1       Running   1          3m        192.168.20.28   k8s-master02
+kube-system   kube-proxy-mxcwz                          1/1       Running   2          16m       192.168.20.27   k8s-master01
+kube-system   kube-proxy-vz7nf                          1/1       Running   1          3m        192.168.20.29   k8s-master03
+kube-system   kube-scheduler-k8s-master01                   1/1       Running   2          16m       192.168.20.27   k8s-master01
+kube-system   kube-scheduler-k8s-master02                   1/1       Running   1          2m        192.168.20.28   k8s-master02
+kube-system   kube-scheduler-k8s-master03                   1/1       Running   1          2m        192.168.20.29   k8s-master03
+kube-system   kubernetes-dashboard-7b7b5cd79b-6ldfn     1/1       Running   3          12m       10.244.172.12   k8s-master01
+kube-system   monitoring-grafana-76848b566c-h5998       1/1       Running   2          11m       10.244.172.14   k8s-master01
+kube-system   monitoring-influxdb-6c4b84d695-whzmp      1/1       Running   2          11m       10.244.172.10   k8s-master01
 ```
 
 * on any kubernetes master nodes: set all master nodes scheduable
 
 ```
 $ kubectl taint nodes --all node-role.kubernetes.io/master-
-node "master02" untainted
-node "master03" untainted
+node "k8s-master02" untainted
+node "k8s-master03" untainted
 ```
 
 * on any kubernetes master nodes: scale the kube-system deployment to all master nodes
@@ -763,9 +761,9 @@ $ kubectl get pods --all-namespaces -o wide| grep kubernetes-dashboard
 ```
 kubectl get nodes
 NAME              STATUS    ROLES     AGE       VERSION
-master01          Ready     master    38m       v1.9.3
-master02          Ready     master    25m       v1.9.3
-master03          Ready     master    25m       v1.9.3
+k8s-master01          Ready     master    38m       v1.9.3
+k8s-master02          Ready     master    25m       v1.9.3
+k8s-master03          Ready     master    25m       v1.9.3
 ```
 
 ---
@@ -833,7 +831,7 @@ $ kubectl delete pod -n kube-system kube-proxy-XXX
 
 #### use kubeadm to join the cluster
 
-- on all kubernetes worker nodes: use kubeadm to join the cluster, here we use the master01 apiserver address and port.
+- on all kubernetes worker nodes: use kubeadm to join the cluster, here we use the k8s-master01 apiserver address and port.
 
 ```
 $ kubeadm join --token 7f276c.0741d82a5337f526 192.168.20.27:6443 --discovery-token-ca-cert-hash sha256:a4a1eaf725a0fc67c3028b3063b92e6af7f2eb0f4ae028f12b3415a6fd2d2a5e
@@ -851,9 +849,9 @@ systemctl restart docker && systemctl restart kubelet
 ```
 kubectl get nodes
 NAME              STATUS    ROLES     AGE       VERSION
-master01          Ready     master    46m       v1.9.3
-master02          Ready     master    44m       v1.9.3
-master03          Ready     master    44m       v1.9.3
+k8s-master01          Ready     master    46m       v1.9.3
+k8s-master02          Ready     master    44m       v1.9.3
+k8s-master03          Ready     master    44m       v1.9.3
 node01            Ready     <none>    50s       v1.9.3
 node02            Ready     <none>    26s       v1.9.3
 node03            Ready     <none>    22s       v1.9.3
@@ -880,7 +878,7 @@ deployment "nginx" created
 $ kubectl get pods -l=run=nginx -o wide
 NAME                     READY     STATUS    RESTARTS   AGE       IP              NODE
 nginx-6c7c8978f5-558kd   1/1       Running   0          9m        10.244.77.217   node03
-nginx-6c7c8978f5-ft2z5   1/1       Running   0          9m        10.244.172.67   master01
+nginx-6c7c8978f5-ft2z5   1/1       Running   0          9m        10.244.172.67   k8s-master01
 nginx-6c7c8978f5-jr29b   1/1       Running   0          9m        10.244.85.165   node04
 
 # create nginx NodePort service
@@ -893,7 +891,7 @@ NAME      TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE       SEL
 nginx     NodePort   10.101.144.192   <none>        80:30847/TCP   10m       run=nginx
 
 # check nginx NodePort service accessibility
-$ curl master01:30847
+$ curl k8s-master01:30847
 <!DOCTYPE html>
 <html>
 <head>
