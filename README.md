@@ -298,8 +298,8 @@ Permissive
 
 ```
 $ curl -fsSL https://get.docker.com/ | sh
-$ systemctl enable docker && systemctl start docker
 $ yum install -y docker-compose-1.9.0-5.el7.noarch
+$ systemctl enable docker && systemctl start docker
 
 $ yum install -y kubelet-1.9.3-0.x86_64 kubeadm-1.9.3-0.x86_64 kubectl-1.9.3-0.x86_64
 $ systemctl enable kubelet && systemctl start kubelet
