@@ -95,9 +95,9 @@
 
 HostName | IPAddress | Notes | Components 
 :--- | :--- | :--- | :---
-k8s-master01 ~ 03 | 192.168.20.27 ~ 29 | master nodes * 3 | keepalived, nginx, etcd, kubelet, kube-apiserver, kube-scheduler, kube-proxy, kube-dashboard, heapster, calico
-N/A | 192.168.20.10 | keepalived virtual IP | N/A
-node01 ~ 04 | 192.168.20.17 ~ 20 | worker nodes * 4 | kubelet, kube-proxy
+k8s-master01 ~ 03 |172.31.48.133 172.31.48.134 172.31.48.137| master nodes * 3 | keepalived, nginx, etcd, kubelet, kube-apiserver, kube-scheduler, kube-proxy, kube-dashboard, heapster, calico
+N/A | 172.31.48.10 | keepalived virtual IP | N/A
+node01 ~ 04 | 172.31.48.138 ~ 141 | worker nodes * 4 | kubelet, kube-proxy
 
 #### ports list
 
@@ -366,7 +366,7 @@ $ cd kubeadm-ha
 $ vi create-config.sh
 
 # local machine ip address
-export K8SHA_IPLOCAL=192.168.20.27
+export K8SHA_IPLOCAL=172.31.48.133
 
 # local machine etcd name, options: etcd1, etcd2, etcd3
 export K8SHA_ETCDNAME=etcd1
@@ -385,16 +385,16 @@ export K8SHA_KA_INTF=nm-bond
 #######################################
 
 # master keepalived virtual ip address
-export K8SHA_IPVIRTUAL=192.168.20.10
+export K8SHA_IPVIRTUAL=172.31.48.10
 
 # k8s-master01 ip address
-export K8SHA_IP1=192.168.20.27
+export K8SHA_IP1=172.31.48.133
 
 # k8s-master02 ip address
-export K8SHA_IP2=192.168.20.28
+export K8SHA_IP2=172.31.48.134
 
 # k8s-master03 ip address
-export K8SHA_IP3=192.168.20.29
+export K8SHA_IP3=172.31.48.137
 
 # k8s-master01 hostname
 export K8SHA_HOSTNAME1=k8s-master01
@@ -406,7 +406,7 @@ export K8SHA_HOSTNAME2=k8s-master02
 export K8SHA_HOSTNAME3=k8s-master03
 
 # keepalived auth_pass config, all masters must be same
-export K8SHA_KA_AUTH=4cdf7dc3b4c90194d1600c483e10ad1d
+export K8SHA_KA_AUTH=12588fa9-c0c6-4557-954a-a52bd22a171f
 
 # kubernetes cluster token, you can use 'kubeadm token generate' to get a new one
 export K8SHA_TOKEN=7f276c.0741d82a5337f526
