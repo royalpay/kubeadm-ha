@@ -161,6 +161,18 @@ Server:
   Experimental:	false
 ```
 
+* docker-compose version: 1.9.0
+
+```
+$ docker-compose version
+
+docker-compose version 1.9.0, build 2585387
+docker-py version: 1.10.6
+CPython version: 2.7.5
+OpenSSL version: OpenSSL 1.0.1e-fips 11 Feb 2013
+
+```
+
 * kubeadm version: v1.9.3
 
 ```
