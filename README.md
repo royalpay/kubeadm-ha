@@ -356,7 +356,7 @@ $ systemctl enable keepalived && systemctl restart keepalived
 
 ```
 $ yum install -y git
-$ git clone https://github.com/cookeem/kubeadm-ha
+$ git clone -b 1.9.3 https://github.com/royalpay/kubeadm-ha.git
 
 $ cd kubeadm-ha
 ```
