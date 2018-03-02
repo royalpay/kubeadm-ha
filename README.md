@@ -310,8 +310,6 @@ Permissive
 
 ```
 $ curl -fsSL https://get.docker.com/ | sh
-$ yum install -y docker-compose-1.9.0-5.el7.noarch
-$ systemctl enable docker && systemctl start docker
 
 # solve problem https://ask.openstack.org/en/question/110437/importerror-cannot-import-name-unrewindablebodyerror/
 $ pip uninstall requests -y
@@ -320,7 +318,9 @@ $ yum remove python-urllib3 -y
 $ yum remove python-requests -y
 $ yum install python-urllib3 -y
 $ yum install python-requests -y
+$ yum install -y docker-compose-1.9.0-5.el7.noarch
 
+$ systemctl enable docker && systemctl start docker
 $ yum install -y kubelet-1.9.3-0.x86_64 kubeadm-1.9.3-0.x86_64 kubectl-1.9.3-0.x86_64
 $ systemctl enable kubelet && systemctl start kubelet
 ```
