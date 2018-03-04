@@ -241,7 +241,8 @@ EOF
 * on all kubernetes nodes: use yum to update system
 
 ```
-$ yum update -y
+$ yum -y install epel-release
+$ yum -y update
 ```
 
 * on all kubernetes nodes: turn off firewalld service
