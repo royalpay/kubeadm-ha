@@ -493,8 +493,6 @@ $ rm -rf /etc/cni/
 
 $ ip a | grep -E 'docker|flannel|cni'
 $ ip link del docker0
-$ ip link del flannel.1
-$ ip link del cni0
 
 $ systemctl restart docker && systemctl restart kubelet
 $ ip a | grep -E 'docker|flannel|cni'
