@@ -314,8 +314,8 @@ $ yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 $  yum install -y --setopt=obsoletes=0 \
-  docker-ce-17.12.1.ce-1.el7.centos \
-  docker-ce-selinux-17.12.1.ce-1.el7.centos   
+  docker-ce-17.03.2.ce-1.el7.centos \
+  docker-ce-selinux-17.03.2.ce-1.el7.centos  
     
     
 # solve problem https://ask.openstack.org/en/question/110437/importerror-cannot-import-name-unrewindablebodyerror/
