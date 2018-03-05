@@ -310,8 +310,14 @@ Permissive
 * on all kubernetes nodes: install kubernetes and related services, then start up kubelet and docker daemon
 
 ```
-$ curl -fsSL https://get.docker.com/ | sh
-
+$ yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+$  yum install -y --setopt=obsoletes=0 \
+  docker-ce-17.12.1.ce-1.el7.centos \
+  docker-ce-selinux-17.12.1.ce-1.el7.centos   
+    
+    
 # solve problem https://ask.openstack.org/en/question/110437/importerror-cannot-import-name-unrewindablebodyerror/
 $ pip uninstall requests -y
 $ pip uninstall urllib3 -y 
