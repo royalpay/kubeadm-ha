@@ -493,6 +493,8 @@ $ rm -rf /etc/cni/
 
 $ ip a | grep -E 'docker|flannel|cni'
 $ ip link del docker0
+$ ip link del flannel.1
+$ ip link del cni0
 
 $ systemctl restart docker && systemctl restart kubelet
 $ ip a | grep -E 'docker|flannel|cni'
@@ -571,16 +573,17 @@ deployment "kubernetes-dashboard" created
 service "kubernetes-dashboard" created
 
 $ kubectl get pods --all-namespaces
-NAMESPACE       NAME                                        READY     STATUS    RESTARTS   AGE
-kube-system     calico-kube-controllers-7749c84f4-p8c4d     1/1       Running   0          3m
-kube-system     calico-node-2jlwj                           2/2       Running   6          13m
-kube-system     kube-apiserver-k8s-master01              1/1       Running   6          5m
-kube-system     kube-controller-manager-k8s-master01     1/1       Running   8          5m
-kube-system     kube-dns-6f4fd4bdf-8jnpc                    3/3       Running   3          4m
-kube-system     kube-flannel-ds-2fgsw                       1/1       Running   8          14m
-kube-system     kube-proxy-7rh8x                            1/1       Running   3          13m
-kube-system     kube-scheduler-k8s-master01              1/1       Running   8          5m
-kube-system     kubernetes-dashboard-87497878f-p6nj4        1/1       Running   0          4m
+NAMESPACE     NAME                                      READY     STATUS    RESTARTS   AGE
+kube-system   calico-kube-controllers-7749c84f4-drgd7   1/1       Running   2          14h
+kube-system   heapster-698c5f45bd-qh49j                 1/1       Running   2          54m
+kube-system   kube-apiserver-k8s-master01               1/1       Running   6          23h
+kube-system   kube-controller-manager-k8s-master01      1/1       Running   6          23h
+kube-system   kube-dns-6f4fd4bdf-sgmtt                  3/3       Running   9          23h
+kube-system   kube-flannel-ds-79kvh                     1/1       Running   3          22h
+kube-system   kube-proxy-2jg9c                          1/1       Running   3          23h
+kube-system   kube-scheduler-k8s-master01               1/1       Running   6          23h
+kube-system   kubernetes-dashboard-87497878f-nlhtv      1/1       Running   12         15h
+
 ```
 
 * use browser to access dashboard
@@ -615,34 +618,33 @@ clusterrolebinding "heapster" created
 
 $ kubectl get pods --all-namespaces 
 NAME                                      READY     STATUS        RESTARTS   AGE
-calico-kube-controllers-7749c84f4-p8c4d   1/1       Running       0          8m
-calico-node-2jlwj                         2/2       Running       6          13d
-heapster-698c5f45bd-wnv6x                 1/1       Running       0          1m
-kube-apiserver-k8s-master01            1/1       Running       6          5d
-kube-controller-manager-k8s-master01   1/1       Running       8          5d
-kube-dns-6f4fd4bdf-8jnpc                  3/3       Running       3          4h
-kube-flannel-ds-2fgsw                     1/1       Running       8          14d
-kube-proxy-7rh8x                          1/1       Running       3          13d
-kube-scheduler-k8s-master01            1/1       Running       8          5d
-kubernetes-dashboard-87497878f-p6nj4      1/1       Running       0          4h
-monitoring-grafana-5ffb49ff84-xxwzn       1/1       Running       0          1m
-monitoring-influxdb-5b77d47fdd-wd7xm      1/1       Running       0          1m
+NAMESPACE     NAME                                      READY     STATUS    RESTARTS   AGE
+kube-system   calico-kube-controllers-7749c84f4-drgd7   1/1       Running   2          14h
+kube-system   heapster-698c5f45bd-qh49j                 1/1       Running   2          54m
+kube-system   kube-apiserver-k8s-master01               1/1       Running   6          23h
+kube-system   kube-controller-manager-k8s-master01      1/1       Running   6          23h
+kube-system   kube-dns-6f4fd4bdf-sgmtt                  3/3       Running   9          23h
+kube-system   kube-flannel-ds-79kvh                     1/1       Running   3          22h
+kube-system   kube-proxy-2jg9c                          1/1       Running   3          23h
+kube-system   kube-scheduler-k8s-master01               1/1       Running   6          23h
+kube-system   kubernetes-dashboard-87497878f-nlhtv      1/1       Running   12         15h
+kube-system   monitoring-grafana-5ffb49ff84-jlr2c       1/1       Running   3          15h
+kube-system   monitoring-influxdb-5b77d47fdd-8m4hv      1/1       Running   1          54m
 
 # wait for 5 minutes
 kubectl top pod --all-namespaces
 NAMESPACE     NAME                                      CPU(cores)   MEMORY(bytes)   
-kube-system   calico-kube-controllers-d987c6db5-zjxnv   0m           20Mi            
-kube-system   calico-node-hmdlg                         16m          83Mi            
-kube-system   heapster-dfd674df9-hct67                  1m           24Mi            
-kube-system   kube-apiserver-k8s-master01                   24m          240Mi           
-kube-system   kube-controller-manager-k8s-master01          14m          50Mi            
-kube-system   kube-dns-6f4fd4bdf-zg66x                  1m           49Mi            
-kube-system   kube-flannel-ds-h7ng4                     6m           33Mi            
-kube-system   kube-proxy-mxcwz                          2m           29Mi            
-kube-system   kube-scheduler-k8s-master01                   5m           22Mi            
-kube-system   kubernetes-dashboard-7b7b5cd79b-6ldfn     0m           20Mi            
-kube-system   monitoring-grafana-76848b566c-h5998       0m           28Mi            
-kube-system   monitoring-influxdb-6c4b84d695-whzmp      1m           24Mi            
+kube-system   calico-kube-controllers-7749c84f4-drgd7   0m           12Mi            
+kube-system   heapster-698c5f45bd-qh49j                 0m           28Mi            
+kube-system   kube-apiserver-k8s-master01               12m          208Mi           
+kube-system   kube-controller-manager-k8s-master01      10m          46Mi            
+kube-system   kube-dns-6f4fd4bdf-sgmtt                  0m           32Mi            
+kube-system   kube-flannel-ds-79kvh                     1m           15Mi            
+kube-system   kube-proxy-2jg9c                          1m           22Mi            
+kube-system   kube-scheduler-k8s-master01               3m           16Mi            
+kube-system   kubernetes-dashboard-87497878f-nlhtv      0m           15Mi            
+kube-system   monitoring-grafana-5ffb49ff84-jlr2c       0m           12Mi            
+kube-system   monitoring-influxdb-5b77d47fdd-8m4hv      0m           25Mi            
 ```
 
 * heapster performance info will show on dashboard
