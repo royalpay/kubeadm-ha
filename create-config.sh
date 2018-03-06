@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # local machine ip address
-export K8SHA_IPLOCAL=172.31.48.138
+export K8SHA_IPLOCAL=172.31.11.207
 
 # local machine etcd name, options: etcd1, etcd2, etcd3
 export K8SHA_ETCDNAME=etcd1
@@ -20,16 +20,16 @@ export K8SHA_KA_INTF=eth0
 #######################################
 
 # master keepalived virtual ip address
-export K8SHA_IPVIRTUAL=172.31.48.10
+export K8SHA_IPVIRTUAL=172.32.0.10
 
 # master01 ip address
-export K8SHA_IP1=172.31.48.138
+export K8SHA_IP1=172.31.11.207
 
 # master02 ip address
-export K8SHA_IP2=172.31.48.140
+export K8SHA_IP2=172.31.14.64
 
 # master03 ip address
-export K8SHA_IP3=172.31.48.141
+export K8SHA_IP3=172.31.10.80
 
 # master01 hostname
 export K8SHA_HOSTNAME1=k8s-master01
@@ -50,7 +50,7 @@ export K8SHA_TOKEN=e12134.5077d37c41c2fa57
 export K8SHA_CIDR=10.244.0.0\\/16
 
 # calico network settings, set a reachable ip address for the cluster network interface, for example you can use the gateway ip address
-export K8SHA_CALICO_REACHABLE_IP=172.31.48.141
+export K8SHA_CALICO_REACHABLE_IP=172.31.0.1
 
 ##############################
 # please do not modify anything below
