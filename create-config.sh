@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # local machine ip address
-export K8SHA_IPLOCAL=192.168.20.27
+export K8SHA_IPLOCAL=172.31.11.207
 
 # local machine etcd name, options: etcd1, etcd2, etcd3
 export K8SHA_ETCDNAME=etcd1
@@ -13,44 +13,44 @@ export K8SHA_KA_STATE=MASTER
 export K8SHA_KA_PRIO=102
 
 # local machine keepalived network interface name config, for example: eth0
-export K8SHA_KA_INTF=nm-bond
+export K8SHA_KA_INTF=eth0
 
 #######################################
 # all masters settings below must be same
 #######################################
 
 # master keepalived virtual ip address
-export K8SHA_IPVIRTUAL=192.168.20.10
+export K8SHA_IPVIRTUAL=172.32.0.10
 
 # master01 ip address
-export K8SHA_IP1=192.168.20.27
+export K8SHA_IP1=172.31.11.207
 
 # master02 ip address
-export K8SHA_IP2=192.168.20.28
+export K8SHA_IP2=172.31.14.64
 
 # master03 ip address
-export K8SHA_IP3=192.168.20.29
+export K8SHA_IP3=172.31.10.80
 
 # master01 hostname
-export K8SHA_HOSTNAME1=devops-master01
+export K8SHA_HOSTNAME1=k8s-master01
 
 # master02 hostname
-export K8SHA_HOSTNAME2=devops-master02
+export K8SHA_HOSTNAME2=k8s-master02
 
 # master03 hostname
-export K8SHA_HOSTNAME3=devops-master03
+export K8SHA_HOSTNAME3=k8s-master03
 
 # keepalived auth_pass config, all masters must be same
 export K8SHA_KA_AUTH=4cdf7dc3b4c90194d1600c483e10ad1d
 
 # kubernetes cluster token, you can use 'kubeadm token generate' to get a new one
-export K8SHA_TOKEN=7f276c.0741d82a5337f526
+export K8SHA_TOKEN=e12134.5077d37c41c2fa57
 
 # kubernetes CIDR pod subnet, if CIDR pod subnet is "10.244.0.0/16" please set to "10.244.0.0\\/16"
 export K8SHA_CIDR=10.244.0.0\\/16
 
 # calico network settings, set a reachable ip address for the cluster network interface, for example you can use the gateway ip address
-export K8SHA_CALICO_REACHABLE_IP=192.168.20.1
+export K8SHA_CALICO_REACHABLE_IP=172.31.0.1
 
 ##############################
 # please do not modify anything below
